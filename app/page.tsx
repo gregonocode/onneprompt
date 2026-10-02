@@ -1,69 +1,104 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+import Image from "next/image";
+import Link from "next/link";
+import { Heart } from "lucide-react";
+import { useState } from "react";
+import styles from "./page.module.css";
+
+const categories = ["Tudo", "Fotografia", "Food", "Dev", "Design", "Marketing", "Escrita", "Produtividade", "Educação"];
+
+const prompts = [
+  { title: "Retrato com luz de janela", category: "Fotografia", art: "photo", description: "Uma direção de retrato natural, com clima de editorial.", prompt: "Crie uma direção para fotografar um retrato de [pessoa] com luz natural de janela. Descreva pose, enquadramento, lente e uma paleta suave com aparência editorial." },
+  { title: "Um prato que dá vontade", category: "Food", art: "food", description: "Fotografia gastronômica com textura e personalidade.", prompt: "Descreva uma fotografia gastronômica de [prato], destacando texturas, ingredientes frescos e luz lateral suave. Cenário minimalista, composição editorial e cores apetitosas." },
+  { title: "Seu par de programação", category: "Dev", art: "dev", description: "Entenda um problema e avance com passos claros.", prompt: "Atue como uma pessoa desenvolvedora sênior. Ajude-me a resolver [problema] em [linguagem ou framework]. Explique o raciocínio em etapas, mostre uma solução simples e destaque possíveis casos extremos." },
+  { title: "Uma marca com presença", category: "Design", art: "design", description: "Explore um conceito visual consistente para sua marca.", prompt: "Crie um conceito de identidade visual para [marca], que conversa com [público]. Proponha direção de arte, paleta de cores, tipografia e elementos gráficos com personalidade própria." },
+  { title: "Lançamento que conecta", category: "Marketing", art: "marketing", description: "Uma campanha de lançamento com uma ideia central forte.", prompt: "Planeje uma campanha de lançamento para [produto] voltada para [público]. Traga uma ideia central memorável, mensagem principal e três conteúdos para redes sociais com chamadas para ação." },
+  { title: "Uma história que fica", category: "Escrita", art: "writing", description: "Encontre o começo de uma história com a sua cara.", prompt: "Escreva o início de uma história sobre [ideia], com uma voz envolvente e detalhes sensoriais. Apresente uma personagem interessante e termine o primeiro parágrafo com uma pergunta em aberto." },
+  { title: "Uma semana mais leve", category: "Produtividade", art: "focus", description: "Transforme uma lista cheia em um plano possível.", prompt: "Ajude-me a organizar estas tarefas para a semana: [tarefas]. Considere meus horários disponíveis [horários], priorize o que é essencial e distribua pausas para que o plano seja realista." },
+  { title: "Aprender sem complicar", category: "Educação", art: "learn", description: "Entenda um tema difícil com exemplos do dia a dia.", prompt: "Ensine [tema] para alguém que está começando. Use linguagem simples, uma analogia cotidiana, um exemplo prático e termine com três perguntas rápidas para conferir o entendimento." },
+];
+
+function SearchIcon() {
+  return <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.8" cy="8.8" r="5.8" stroke="currentColor" strokeWidth="1.5" /><path d="m13.2 13.2 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
+}
+
+function CopyIcon({ copied }: { copied: boolean }) {
+  return copied
+    ? <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 10.5 4 4L16.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    : <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="7" y="6" width="9" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M12.5 6V4.8A1.8 1.8 0 0 0 10.7 3H5.8A1.8 1.8 0 0 0 4 4.8v6.4A1.8 1.8 0 0 0 5.8 13H7" stroke="currentColor" strokeWidth="1.5" /></svg>;
+}
+
+function PromptArtwork({ art, index }: { art: string; index: number }) {
+  return <div className={`${styles.artwork} ${styles[art]}`} aria-hidden="true">
+    <span className={styles.artGlow} /><span className={styles.artShapeOne} /><span className={styles.artShapeTwo} /><span className={styles.artShapeThree} />
+    <span className={styles.heartMark}><Heart size={17} strokeWidth={1.8} /></span>
+    <span className={styles.artLabel}>ONNE / GRAM</span><span className={styles.artIndex}>{String(index + 1).padStart(2, "0")}</span>
+  </div>;
+}
+
+export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState("Tudo");
+  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
+  const filteredPrompts = activeCategory === "Tudo" ? prompts : prompts.filter((prompt) => prompt.category === activeCategory);
+
+  async function copyPrompt(title: string, prompt: string) {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopiedPrompt(title);
+      window.setTimeout(() => setCopiedPrompt(null), 1800);
+    } catch {
+      setCopiedPrompt(null);
+    }
+  }
+
+  return <div className={styles.appPage}>
+    <header className={styles.topbar}>
+      <Link className={styles.brand} href="/" aria-label="OnneGram, início">
+        <Image src="/icon/icon-onne-512.png" alt="" width={34} height={34} priority />
+        <span>onne<span>gram</span></span>
+      </Link>
+      <nav className={styles.mainNav} aria-label="Navegação principal">
+        <a className={styles.navActive} href="#explorar">Explorar</a><a href="#categorias">Categorias</a><a href="#salvos">Salvos</a>
+      </nav>
+      <div className={styles.topbarRight}>
+        <Link className="create-account-link" href="/login">Entrar</Link>
+        <div className={styles.searchBox}><SearchIcon /><span>Buscar prompts</span><kbd>⌘ K</kbd></div>
+      </div>
+    </header>
+
+    <main className={styles.main} id="explorar">
+      <section className={styles.welcome}>
+        <div>
+          <p className={styles.eyebrow}><span /> BIBLIOTECA DE PROMPTS</p>
+          <h1>Boas ideias começam<br /><span>com o prompt certo.</span></h1>
+          <p className={styles.intro}>Inspire-se, escolha um prompt e leve sua próxima ideia mais longe.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className={styles.welcomeNote}><span className={styles.noteSpark}>✳</span><span>Uma boa ideia<br />está a um prompt de distância.</span></div>
+      </section>
+
+      <section className={styles.library} id="categorias" aria-label="Biblioteca de prompts">
+        <div className={styles.libraryHeading}>
+          <div><p className={styles.sectionEyebrow}>EXPLORE A BIBLIOTECA</p><h2>Encontre sua próxima ideia</h2></div>
+          <span className={styles.resultCount}>{filteredPrompts.length} prompts</span>
         </div>
-      </main>
-    </div>
-  );
+        <div className={styles.categoryBar} role="group" aria-label="Filtrar por categoria">
+          {categories.map((category) => <button className={`${styles.categoryChip} ${activeCategory === category ? styles.categoryActive : ""}`} key={category} type="button" aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category}</button>)}
+        </div>
+        <div className={styles.cardGrid}>
+          {filteredPrompts.map((prompt, index) => {
+            const copied = copiedPrompt === prompt.title;
+            return <article className={styles.promptCard} key={prompt.title}>
+              <PromptArtwork art={prompt.art} index={index} />
+              <div className={styles.cardBody}>
+                <div className={styles.cardMeta}><span>{prompt.category}</span><span className={styles.cardDot} /></div>
+                <h3>{prompt.title}</h3><p>{prompt.description}</p>
+                <button className={`${styles.copyButton} ${copied ? styles.copySuccess : ""}`} type="button" onClick={() => copyPrompt(prompt.title, prompt.prompt)}><CopyIcon copied={copied} />{copied ? "Copiado" : "Copiar prompt"}</button>
+              </div>
+            </article>;
+          })}
+        </div>
+      </section>
+    </main>
+  </div>;
 }
