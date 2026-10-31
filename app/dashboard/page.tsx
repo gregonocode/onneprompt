@@ -1,16 +1,99 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/app/auth/actions";
+import { ArrowUpRight, Clock3 } from "lucide-react";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email_confirmed_at) redirect("/login");
-  const { data: profile, error } = await supabase.from("profiles").select("profile_slug, account_type, primary_language, is_active").eq("id", user.id).single();
-  if (error || !profile) return <main className="dashboard-shell"><h1>Não foi possível carregar seu perfil</h1><p>Tente atualizar a página. Se o problema continuar, entre em contato com o suporte.</p><form action={logout}><button className="login-submit">Sair</button></form></main>;
-  if (!profile.is_active) return <main className="dashboard-shell"><h1>Conta desativada</h1><form action={logout}><button className="login-submit">Sair</button></form></main>;
-  const creator = profile.account_type === "creator";
-  const languages: Record<string, string> = { "pt-BR": "Português (Brasil)", en: "English", es: "Español" };
-  return <main className="dashboard-shell"><header className="dashboard-header"><Link className="brand-lockup" href="/">onne<span className="brand-lockup-light">gram</span></Link><form action={logout}><button className="dashboard-signout">Sair da conta</button></form></header><p className="form-eyebrow">SUA CONTA</p><h1>Bem-vindo, @{profile.profile_slug}</h1><p>Seu e-mail foi confirmado. Seu espaço na OnneGram está pronto.</p><section className="dashboard-card"><h2>{creator ? "Conta creator" : "Conta usuário"}</h2><p>{creator ? "Você poderá criar e vender prompts e oferecer assinaturas." : "Você poderá copiar prompts, comprar saldo e assinar seus creators favoritos."}</p><dl><dt>E-mail</dt><dd>{user.email}</dd><dt>Idioma preferido</dt><dd>{languages[profile.primary_language] ?? profile.primary_language}</dd></dl><Link className="create-account-link" href="/">Explorar prompts</Link></section><p className="field-hint">{creator ? "Publicação de prompts, vendas e assinaturas estarão disponíveis em breve." : "Compra de saldo e assinaturas estarão disponíveis em breve."}</p></main>;
+const platforms = [
+  {
+    name: "Notion",
+    category: "Organización",
+    description: "Reúne documentos, notas y proyectos de tu equipo.",
+    mark: "N",
+    color: "violet",
+  },
+  {
+    name: "Trello",
+    category: "Tareas",
+    description: "Visualiza pendientes y sigue el avance de cada proyecto.",
+    mark: "T",
+    color: "blue",
+  },
+  {
+    name: "Slack",
+    category: "Trabajo en equipo",
+    description: "Mantén las conversaciones de trabajo cerca de tus tareas.",
+    mark: "S",
+    color: "green",
+  },
+  {
+    name: "Discord",
+    category: "Comunidad",
+    description: "Encuentra a tu comunidad y participa en sus espacios.",
+    mark: "D",
+    color: "indigo",
+  },
+  {
+    name: "Telegram",
+    category: "Mensajería",
+    description: "Sigue tus grupos y conversaciones importantes.",
+    mark: "Tg",
+    color: "cyan",
+  },
+  {
+    name: "Google Drive",
+    category: "Archivos",
+    description: "Ten tus documentos y recursos a mano en un mismo lugar.",
+    mark: "G",
+    color: "yellow",
+  },
+];
+
+export default function DashboardHomePage() {
+  return (
+    <div className="dashboard-content">
+      <section className="dashboard-welcome">
+        <div>
+          <p className="dashboard-eyebrow">TU ESPACIO DE TRABAJO</p>
+          <h1>Todo conectado.<br /><span>Todo en movimiento.</span></h1>
+          <p className="dashboard-lead">
+            Organiza tus tareas, conversaciones y comunidades desde un solo lugar.
+          </p>
+        </div>
+        <div className="dashboard-welcome-foot">
+          <span><span className="dashboard-live-dot" /> Tu espacio, a tu manera</span>
+          <span>Plataformas <b>·</b> tareas <b>·</b> comunidad</span>
+        </div>
+      </section>
+
+      <section className="dashboard-platforms" aria-labelledby="platforms-heading">
+        <div className="dashboard-section-heading">
+          <div>
+            <p className="dashboard-eyebrow">TU ECOSISTEMA</p>
+            <h2 id="platforms-heading">Plataformas</h2>
+            <p>Descubre los espacios que podrás reunir en OnneGram.</p>
+          </div>
+          <span className="dashboard-count">{platforms.length} plataformas</span>
+        </div>
+
+        <div className="platform-grid">
+          {platforms.map((platform) => (
+            <article className="platform-card" key={platform.name}>
+              <div className="platform-card-top">
+                <span className={`platform-mark mark-${platform.color}`} aria-hidden="true">{platform.mark}</span>
+                <span className="platform-status"><Clock3 size={12} /> Próximamente</span>
+              </div>
+              <p className="platform-category">{platform.category}</p>
+              <h3>{platform.name}</h3>
+              <p className="platform-description">{platform.description}</p>
+              <button className="platform-connect" type="button" disabled>
+                Conectar <ArrowUpRight size={15} aria-hidden="true" />
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <p className="dashboard-note">
+        <span aria-hidden="true">i</span>
+        Las conexiones con estas plataformas estarán disponibles próximamente.
+      </p>
+    </div>
+  );
 }
